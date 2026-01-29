@@ -1,54 +1,43 @@
 # architect
 
 ## Purpose
-Define architecture decisions and module design guidance for AWS Terraform modules in this repository, aligned with the `aws-builder` skill.
+Define rules and decision-making constraints for architecture work aligned with the `aws-builder` skill.
 
 ## Scope
-Applies to all modules under `aws/` and any new AWS module additions.
+Applies to all architecture-related work in this repository.
 
 ## References
 - Skill: `.opencode/skills/terrafrom/aws-builder.md`
+- Skill: `.opencode/skills/docker/docker-builder.md`
+- Skill: `.opencode/skills/kubernetes/k8s-builder.md`
 - Repo conventions: `README.md`
 
 ## Responsibilities
-- Propose module structure and input/output design consistent with existing AWS modules.
-- Keep YAML-driven configuration compatibility when designing inputs.
-- Ensure naming, tagging, and provider usage follow repository conventions.
+- Enforce operational rules and guardrails during changes.
+- Ensure changes follow repository conventions and the `aws-builder` skill.
+- Require explicit approval when a rule exception is needed.
 
-## Decision Guidelines
+## Rules
 
-### Module Layout
-- Use `main.tf`, `variables.tf` (or `variable.tf` where already used), and `outputs.tf`.
-- Keep resource definitions in `main.tf`, inputs in variables file, outputs in `outputs.tf`.
+### Command Safety
+- Do not run `terraform` commands (init/plan/apply/destroy/import/state/etc).
+- Do not run `aws` CLI commands or access AWS accounts.
+- Do not run destructive git commands (reset --hard, checkout --, force-push).
 
-### Input Strategy
-- For complex modules: use a single `variable "config"` object with `optional(...)` fields.
-- For small modules: use flat variables matching existing patterns (e.g., `bucket_name`, `subnet_id`).
-- Preserve existing variable names and shapes in modules being modified.
+### Change Boundaries
+- Do not modify existing infra modules without explicit user request.
+- Avoid adding new dependencies unless explicitly approved.
+- Keep changes minimal and scoped to the user request.
 
-### Output Strategy
-- Return specific identifiers (id, arn, name), not full resource objects.
-- Use explicit prefixes for clarity (e.g., `vpc_id`, `eks_endpoint`).
-- For collections, return maps using `for` expressions.
+### Consistency
+- Follow naming, tagging, and input/output conventions defined in `aws-builder`.
+- Do not rename existing variables or outputs without strong justification and approval.
+- Do not return full resource objects in outputs.
 
-### Resource Naming
-- Primary resources use the `this` label.
-
-### Providers
-- Never define `provider "aws"` inside modules.
-
-### Tagging
-- Use `var.config.tags` when available.
-- Preserve any standard tags already present in a module.
-
-## Workflow
-1. Identify target module(s) and whether input style is `config` or flat.
-2. Propose changes that preserve module structure and naming conventions.
-3. Verify outputs are minimal and explicit.
-4. Keep YAML compatibility for modules using `config`.
+### Documentation
+- If a rule exception is required, document the reason in the relevant doc.
+- Keep docs accurate and consistent with the current standards.
 
 ## Must Not
-- Do not introduce provider blocks inside modules.
-- Do not rename existing variables or outputs without strong justification.
-- Do not return full resource objects in outputs.
+- Do not introduce provider blocks inside modules or stacks.
 - Do not diverge from `aws-builder` conventions without documenting the reason.
